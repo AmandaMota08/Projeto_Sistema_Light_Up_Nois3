@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Light Up - Perfil</title>
+    <link rel="stylesheet" href="style.css">
+    <link rel="icon" href="favicon.png" type="image/png">
+    <link rel="stylesheet" type="text/css" href="https://cdn.jsdelivr.net/npm/toastify-js/src/toastify.min.css">
+</head>
+<body>
+    <header>
+        <nav class="navPrincipal container">
+            <a href="index1.html" class="marcaSistema">
+                <div class="logoSistema">💡</div>
+                <h1>Light Up</h1>
+            </a>
+            <div class="acoesNav">
+                <button id="btnLoginLogout" class="botao"></button>
+            </div>
+        </nav>
+    </header>
+
+    <main class="container">
+        <div class="secaoHero">
+            <div class="cartaoHero">
+                <span class="selo">✨ Seu Perfil</span>
+                <h2 id="nomeUsuarioPerfil"></h2>
+                <p class="textoMutado" id="emailUsuarioPerfil"></p>
+            </div>
+        </div>
+
+        <section class="secaoEntradas">
+            <div class="cabecalhoSecao">
+                <h2>Suas Entradas</h2>
+                <div class="ordenacao">
+                    <select id="selectOrdenacaoPerfil" class="entrada">
+                        <option value="data">Mais Recentes</option>
+                        <option value="tipo">Tipo</option>
+                    </select>
+                </div>
+            </div>
+            <div class="filtrosRapidos" id="filtrosRapidosPerfil">
+                <button class="filtroRapido ativo" data-filtro="todos">Todos</button>
+                <button class="filtroRapido" data-filtro="agradecimentos">Agradecimentos</button>
+                <button class="filtroRapido" data-filtro="pedidos">Pedidos</button>
+                <button class="filtroRapido" data-filtro="reflexoes">Reflexões</button>
+                <button class="filtroRapido" data-filtro="devocionais">Devocionais</button>
+                <button class="filtroRapido" data-filtro="leituras">Leituras</button>
+            </div>
+            <div class="gradeEntradas" id="gradeEntradasPerfil"></div>
+            <div class="entradaVazia" id="entradaVaziaPerfil">
+                <span class="iconeVazio">😔</span>
+                <h3>Nenhuma entrada encontrada.</h3>
+                <p>Comece a registrar seus momentos de fé e gratidão!</p>
+            </div>
+        </section>
+    </main>
+
+    <dialog id="modalVisualizarEntrada">
+        <div class="cabecalhoModal">
+            <h3 id="visualizarTitulo"></h3>
+            <div class="acoesEntrada">
+                <button id="btnEditarEntrada" class="botaoAcao">✏️</button>
+                <button id="btnExcluirEntrada" class="botaoAcao">🗑️</button>
+                <button id="btnFecharModalVisualizarEntrada" class="botaoFechar">✖️</button>
+            </div>
+        </div>
+        <div class="conteudoModal">
+            <div class="infoEntrada">
+                <span id="visualizarTipo" class="categoriaTag"></span>
+                <div class="detalhesEntrada">
+                    <span class="detalheItem">🗓️ <span id="visualizarData"></span></span>
+                </div>
+                <div id="visualizarReferencia" class="referenciaBiblicaModal" style="display: none;">
+                    <span class="iconeReferencia">📖</span>
+                    <span class="textoReferencia"></span>
+                </div>
+            </div>
+            <div class="secaoConteudo">
+                <h4>Conteúdo</h4>
+                <p class="textoConteudo" id="visualizarConteudo"></p>
+            </div>
+        </div>
+    </dialog>
+
+    <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/toastify-js"></script>
+    <script src="script.js"></script>
+</body>
+</html>
+

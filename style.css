@@ -929,3 +929,141 @@ dialog::backdrop {
         transform: translateX(100%) translateY(100%) rotate(45deg);
     }
 }
+
+
+/* Estilos para as páginas de Login e Cadastro */
+.container-auth {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 100vh;
+    background-color: #f0f2f5;
+    padding: 20px;
+}
+
+.card-auth {
+    background-color: #ffffff;
+    padding: 40px;
+    border-radius: 8px;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+    text-align: center;
+    width: 100%;
+    max-width: 400px;
+}
+
+.card-auth h1 {
+    color: #333;
+    margin-bottom: 10px;
+}
+
+.card-auth h2 {
+    color: #555;
+    margin-bottom: 20px;
+    font-size: 1.5em;
+}
+
+.card-auth .logoSistema {
+    font-size: 3em;
+    margin-bottom: 10px;
+}
+
+.formLogin, .formCadastro {
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+    margin-top: 20px;
+}
+
+.campoForm {
+    text-align: left;
+}
+
+.campoForm label {
+    display: block;
+    margin-bottom: 5px;
+    color: #333;
+    font-weight: 500;
+}
+
+.campoForm .entrada {
+    width: 100%;
+    padding: 10px;
+    border: 1px solid #ddd;
+    border-radius: 5px;
+    box-sizing: border-box;
+}
+
+.card-auth .botaoPrimario {
+    width: 100%;
+    padding: 12px;
+    margin-top: 20px;
+    font-size: 1.1em;
+}
+
+.card-auth p {
+    margin-top: 20px;
+    color: #666;
+}
+
+.card-auth p a {
+    color: #007bff;
+    text-decoration: none;
+}
+
+.card-auth p a:hover {
+    text-decoration: underline;
+}
+
+/* Estilos para Toasts */
+.toastify {
+    padding: 12px 20px;
+    color: #fff;
+    border-radius: 4px;
+    box-shadow: 0 3px 6px -1px rgba(0, 0, 0, 0.12), 0 10px 36px -4px rgba(77, 96, 232, 0.3);
+    opacity: 0;
+    position: fixed;
+    max-width: 100%;
+    min-width: 200px;
+    transform: translateY(-100%);
+    transition: all 0.4s cubic-bezier(0.215, 0.61, 0.355, 1);
+    cursor: pointer;
+    z-index: 9999;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+}
+
+.toastify.on {
+    opacity: 1;
+    transform: translateY(0);
+}
+
+.toast-close {
+    background: transparent;
+    border: none;
+    color: #fff;
+    font-size: 1.2em;
+    cursor: pointer;
+    margin-left: 10px;
+}
+
+.toastify-right {
+    right: 15px;
+}
+
+.toastify-left {
+    left: 15px;
+}
+
+.toastify-top {
+    top: 15px;
+}
+
+.toastify-bottom {
+    bottom: 15px;
+}
+
+/* Ajustes para o corpo da página principal quando o appContent está ativo */
+body:has(#appContent[style*="display: block"]) {
+    background-color: #f0f2f5; /* Cor de fundo para o corpo quando o appContent está visível */
+}
