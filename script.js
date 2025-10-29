@@ -42,7 +42,7 @@ document.addEventListener("DOMContentLoaded", () => {
     let usuarioLogado = JSON.parse(localStorage.getItem("usuarioLogado"));
 
     // Função para exibir toasts
-    const showToast = (message, type = "info") => {
+    const showToast = (message, type = "info", duration = 3000) => {
         let backgroundColor;
         switch (type) {
             case "success":
@@ -59,7 +59,7 @@ document.addEventListener("DOMContentLoaded", () => {
         }
         Toastify({
             text: message,
-            duration: 3000,
+            duration: duration,
             newWindow: true,
             close: true,
             gravity: "top", // `top` or `bottom`
@@ -361,7 +361,7 @@ document.addEventListener("DOMContentLoaded", () => {
             if (window.location.pathname.includes("perfil.html")) {
                 exibirHistoricoLeituras(); // Atualiza a aba de perfil se estiver nela
             }
-            showToast(`Interação "${titulo}" (${tipo}) registrada no histórico.`, "info");
+            showToast(`Interação "${titulo}" (${tipo}) registrada no histórico.`, "info", 3000);
         }
     };
 
