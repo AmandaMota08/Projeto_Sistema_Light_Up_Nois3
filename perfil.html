@@ -55,6 +55,13 @@
                 <p>Comece a registrar seus momentos de fé e gratidão!</p>
             </div>
         </section>
+
+        <section class="secaoHistorico">
+            <div class="cabecalhoSecao">
+                <h2>Histórico de Leituras</h2>
+            </div>
+            <div id="historicoLeiturasContainer" class="cartaoHistorico"></div>
+        </section>
     </main>
 
     <dialog id="modalVisualizarEntrada">
@@ -68,8 +75,9 @@
         </div>
         <div class="conteudoModal">
             <div class="infoEntrada">
-                <span id="visualizarTipo" class="categoriaTag"></span>
-                <div class="detalhesEntrada">
+	                <span id="visualizarTipo" class="categoriaTag"></span>
+	                <span class="autorTag" id="visualizarAutor" style="display: none;"></span>
+	                <div class="detalhesEntrada">
                     <span class="detalheItem">🗓️ <span id="visualizarData"></span></span>
                 </div>
                 <div id="visualizarReferencia" class="referenciaBiblicaModal" style="display: none;">

@@ -38,7 +38,8 @@ document.addEventListener("DOMContentLoaded", () => {
 
     let entradas = [];
     let usuarios = JSON.parse(localStorage.getItem("lightUpUsuarios")) || [];
-    let usuarioLogado = JSON.parse(sessionStorage.getItem("usuarioLogado"));
+    let historicoLeituras = JSON.parse(localStorage.getItem("lightUpHistoricoLeituras")) || {};
+    let usuarioLogado = JSON.parse(localStorage.getItem("usuarioLogado"));
 
     // Função para exibir toasts
     const showToast = (message, type = "info") => {
@@ -74,6 +75,7 @@ document.addEventListener("DOMContentLoaded", () => {
     // --- Funções de Autenticação ---
     const salvarUsuarios = () => {
         localStorage.setItem("lightUpUsuarios", JSON.stringify(usuarios));
+        localStorage.setItem("lightUpHistoricoLeituras", JSON.stringify(historicoLeituras));
     };
 
     const registrarUsuario = (nome, email, senha) => {
@@ -91,7 +93,7 @@ document.addEventListener("DOMContentLoaded", () => {
     const fazerLogin = (email, senha) => {
         const usuario = usuarios.find(user => user.email === email && user.senha === senha);
         if (usuario) {
-            sessionStorage.setItem("usuarioLogado", JSON.stringify(usuario));
+            localStorage.setItem("usuarioLogado", JSON.stringify(usuario));
             usuarioLogado = usuario;
             showToast(`Bem-vindo(a), ${usuario.nome}!`, "success");
             window.location.href = "index1.html";
@@ -102,7 +104,7 @@ document.addEventListener("DOMContentLoaded", () => {
     };
 
     const fazerLogout = () => {
-        sessionStorage.removeItem("usuarioLogado");
+        localStorage.removeItem("usuarioLogado");
         usuarioLogado = null;
         showToast("Você foi desconectado.", "info");
         window.location.href = "login.html";
@@ -151,19 +153,46 @@ document.addEventListener("DOMContentLoaded", () => {
 
     const salvarEntradas = () => {
         if (usuarioLogado) {
-            localStorage.setItem(`lightUpEntradas_${usuarioLogado.email}`, JSON.stringify(entradas));
+            // Salva apenas as entradas do usuário logado
+            const entradasDoUsuario = entradas.filter(e => !e.autor || e.emailAutor === usuarioLogado.email);
+            localStorage.setItem(`lightUpEntradas_${usuarioLogado.email}`, JSON.stringify(entradasDoUsuario));
         }
     };
 
     const carregarEntradas = () => {
         if (usuarioLogado) {
+            // Carrega as entradas do usuário logado
             const entradasSalvas = localStorage.getItem(`lightUpEntradas_${usuarioLogado.email}`);
-            if (entradasSalvas) {
-                entradas = JSON.parse(entradasSalvas);
-            } else {
-                // Entradas de exemplo para demonstração se for o primeiro login
-                if (usuarios.length === 1 && usuarioLogado.email === usuarios[0].email) {
-                    entradas = [
+            entradas = entradasSalvas ? JSON.parse(entradasSalvas) : [];
+
+            // Carrega entradas de outros usuários (para exibição global)
+            const entradasGlobais = [];
+            usuarios.forEach(user => {
+                if (user.email !== usuarioLogado.email) {
+                    const outrasEntradasSalvas = localStorage.getItem(`lightUpEntradas_${user.email}`);
+                    if (outrasEntradasSalvas) {
+                        const outrasEntradas = JSON.parse(outrasEntradasSalvas);
+                        outrasEntradas.forEach(entradaGlobal => {
+                            // Adicionar a informação de quem criou a entrada
+                            entradasGlobais.push({...entradaGlobal, autor: user.nome, emailAutor: user.email});
+                        });
+                    }
+                }
+            });
+
+            // Mescla as entradas do usuário com as entradas globais, evitando duplicidade de IDs
+            const todasEntradas = [...entradas];
+            entradasGlobais.forEach(entradaGlobal => {
+                // Verifica se já existe uma entrada com o mesmo ID e autor
+                if (!todasEntradas.some(e => e.id === entradaGlobal.id && e.emailAutor === entradaGlobal.emailAutor)) {
+                    todasEntradas.push(entradaGlobal);
+                }
+            });
+            entradas = todasEntradas;
+
+            // Entradas de exemplo para demonstração se for o primeiro login e não houver entradas
+            if (entradas.length === 0 && usuarios.length === 1 && usuarioLogado.email === usuarios[0].email) {
+                entradas = [
                         {
                             id: 1,
                             tipo: "agradecimento",
@@ -184,7 +213,7 @@ document.addEventListener("DOMContentLoaded", () => {
                             id: 3,
                             tipo: "reflexao",
                             titulo: "O que eu cultivo no meu coração?",
-                            conteudo: "Provérbios 4:23 diz: \'Acima de tudo, guarde o seu coração, pois dele procedem as fontes da vida.\' Refletindo sobre isso, percebo a importância de cultivar pensamentos e sentimentos puros.",
+                            conteudo: "Provérbios 4:23 diz: 'Acima de tudo, guarde o seu coração, pois dele procedem as fontes da vida.' Refletindo sobre isso, percebo a importância de cultivar pensamentos e sentimentos puros.",
                             referenciaBiblica: "Provérbios 4:23",
                             dataCriacao: "2025-03-30T14:00:00.000Z"
                         },
@@ -200,7 +229,7 @@ document.addEventListener("DOMContentLoaded", () => {
                             id: 5,
                             tipo: "devocional",
                             titulo: "Força - Josué 1:9",
-                            conteudo: "\'Não fui eu que lhe ordenei? Seja forte e corajoso! Não se apavore nem desanime, pois o Senhor, o seu Deus, estará com você por onde quer que você andar.\' Este versículo me lembra que Deus está comigo em qualquer desafio.",
+                            conteudo: "'Não fui eu que lhe ordenei? Seja forte e corajoso! Não se apavore nem desanime, pois o Senhor, o seu Deus, estará com você por onde quer que você andar.' Este versículo me lembra que Deus está comigo em qualquer desafio.",
                             referenciaBiblica: "Josué 1:9",
                             dataCriacao: "2025-09-01T08:00:00.000Z"
                         },
@@ -208,7 +237,7 @@ document.addEventListener("DOMContentLoaded", () => {
                             id: 6,
                             tipo: "devocional",
                             titulo: "Amor - Efésios 4:32",
-                            conteudo: "\'Sejam bondosos e compassivos uns para com os outros, perdoando-se mutuamente, assim como Deus os perdoou em Cristo.\' Para perdoar e tratar os outros com bondade.",
+                            conteudo: "'Sejam bondosos e compassivos uns para com os outros, perdoando-se mutuamente, assim como Deus os perdoou em Cristo.' Para perdoar e tratar os outros com bondade.",
                             referenciaBiblica: "Efésios 4:32",
                             dataCriacao: "2025-09-02T08:30:00.000Z"
                         },
@@ -216,7 +245,7 @@ document.addEventListener("DOMContentLoaded", () => {
                             id: 7,
                             tipo: "devocional",
                             titulo: "Sabedoria - Tiago 1:5",
-                            conteudo: "\'Se algum de vocês tem falta de sabedoria, peça-a a Deus, que a todos dá livremente, de boa vontade; e lhe será concedida.\' Para pedir direção a Deus nas escolhas.",
+                            conteudo: "'Se algum de vocês tem falta de sabedoria, peça-a a Deus, que a todos dá livremente, de boa vontade; e lhe será concedida.' Para pedir direção a Deus nas escolhas.",
                             referenciaBiblica: "Tiago 1:5",
                             dataCriacao: "2025-09-03T09:00:00.000Z"
                         },
@@ -224,7 +253,7 @@ document.addEventListener("DOMContentLoaded", () => {
                             id: 8,
                             tipo: "leitura",
                             titulo: "A chegada da Luz - Lucas 2:10-11",
-                            conteudo: "\'Mas o anjo lhes disse: \'Não tenham medo. Estou trazendo boas-novas que são para todo o povo: Hoje, na cidade de Davi, nasceu o Salvador, que é Cristo, o Senhor.\' Uma leitura que ilumina o coração.",
+                            conteudo: "'Mas o anjo lhes disse: 'Não tenham medo. Estou trazendo boas-novas que são para todo o povo: Hoje, na cidade de Davi, nasceu o Salvador, que é Cristo, o Senhor.' Uma leitura que ilumina o coração.",
                             referenciaBiblica: "Lucas 2:10-11",
                             dataCriacao: "2025-09-04T10:00:00.000Z"
                         },
@@ -232,23 +261,108 @@ document.addEventListener("DOMContentLoaded", () => {
                             id: 9,
                             tipo: "leitura",
                             titulo: "Cotidiano - Provérbios 4:23",
-                            conteudo: "\'Acima de tudo, guarde o seu coração, pois dele procedem as fontes da vida.\' Uma reflexão sobre a importância de cuidar do que cultivamos internamente.",
+                            conteudo: "'Acima de tudo, guarde o seu coração, pois dele procedem as fontes da vida.' Uma reflexão sobre a importância de cuidar do que cultivamos internamente.",
                             referenciaBiblica: "Provérbios 4:23",
                             dataCriacao: "2025-09-05T11:00:00.000Z"
                         }
                     ];
-                    salvarEntradas();
-                } else {
-                    entradas = [];
-                }
+                salvarEntradas();
             }
         }
     };
 
     const atualizarEstatisticas = () => {
-        if (totalEntradasSpan) totalEntradasSpan.textContent = entradas.length;
+        if (totalEntradasSpan) totalEntradasSpan.textContent = entradas.filter(e => !e.autor || e.emailAutor === usuarioLogado.email).length;
         if (totalDevocionaisSpan) totalDevocionaisSpan.textContent = entradas.filter(e => e.tipo === "devocional").length;
-        if (totalLeiturasSpan) totalLeiturasSpan.textContent = entradas.filter(e => e.tipo === "leitura").length;
+        if (totalLeiturasSpan) {
+            const email = usuarioLogado ? usuarioLogado.email : null;
+            const leituras = email && historicoLeituras[email] ? historicoLeituras[email].length : 0;
+            totalLeiturasSpan.textContent = leituras;
+        }
+    };
+
+    // --- Funções de Histórico de Leituras ---
+    const exibirHistoricoLeituras = () => {
+        const historicoContainer = document.getElementById("historicoLeiturasContainer");
+        if (!historicoContainer || !usuarioLogado) return;
+
+        historicoContainer.innerHTML = "";
+        const leiturasDoUsuario = historicoLeituras[usuarioLogado.email] || [];
+
+        if (leiturasDoUsuario.length === 0) {
+            historicoContainer.innerHTML = "<p class='mensagemVazia'>Nenhuma entrada lida/visualizada ainda.</p>";
+            return;
+        }
+
+        // Agrupar por título para mostrar a contagem de leituras
+        const leiturasAgrupadas = leiturasDoUsuario.reduce((acc, leitura) => {
+            const key = `${leitura.id}-${leitura.titulo}`;
+            if (!acc[key]) {
+                acc[key] = {
+                    titulo: leitura.titulo,
+                    count: 0,
+                    ultimaLeitura: leitura.dataLeitura
+                };
+            }
+            acc[key].count++;
+            acc[key].ultimaLeitura = leitura.dataLeitura; // Mantém a última data
+            return acc;
+        }, {});
+
+        // Converter para array e ordenar pela última leitura
+        const leiturasParaExibir = Object.values(leiturasAgrupadas).sort((a, b) => 
+            new Date(b.ultimaLeitura) - new Date(a.ultimaLeitura)
+        );
+
+        const lista = document.createElement("ul");
+        lista.classList.add("historico-lista");
+
+        leiturasParaExibir.forEach(item => {
+            const li = document.createElement("li");
+            li.innerHTML = `
+                <span class="historico-titulo">${item.titulo}</span>
+                <span class="historico-detalhe">Lido ${item.count} vez(es)</span>
+                <span class="historico-data">Última: ${formatarData(item.ultimaLeitura)}</span>
+            `;
+            lista.appendChild(li);
+        });
+
+        historicoContainer.appendChild(lista);
+    };
+
+    // --- Nova Função: Registrar Interação (Leitura/Visualização) ---
+    const registrarInteracao = (entradaId, titulo, tipo) => {
+        if (usuarioLogado) {
+            const email = usuarioLogado.email;
+            if (!historicoLeituras[email]) {
+                historicoLeituras[email] = [];
+            }
+
+            // Cria um identificador para a leitura
+            const novaLeitura = {
+                id: entradaId,
+                titulo: titulo,
+                dataLeitura: new Date().toISOString()
+            };
+
+            // Verifica se a leitura já foi registrada recentemente para evitar spam
+            const ultimaLeitura = historicoLeituras[email].length > 0 ? historicoLeituras[email][historicoLeituras[email].length - 1] : null;
+            const agora = new Date().getTime();
+            const tempoMinimoEntreLeituras = 5000; // 5 segundos
+
+            if (ultimaLeitura && ultimaLeitura.id === entradaId && (agora - new Date(ultimaLeitura.dataLeitura).getTime()) < tempoMinimoEntreLeituras) {
+                // Leitura já registrada muito recentemente, ignora
+                return;
+            }
+
+            historicoLeituras[email].push(novaLeitura);
+            salvarUsuarios(); // Salva o histórico no localStorage
+            atualizarEstatisticas(); // Atualiza o contador de leituras
+            if (window.location.pathname.includes("perfil.html")) {
+                exibirHistoricoLeituras(); // Atualiza a aba de perfil se estiver nela
+            }
+            showToast(`Interação "${titulo}" (${tipo}) registrada no histórico.`, "info");
+        }
     };
 
     const renderizarEntradas = (filtro = "todos", termoBusca = "", ordenacao = "data", targetGrade = gradeEntradas, targetVazia = entradaVazia) => {
@@ -306,6 +420,7 @@ document.addEventListener("DOMContentLoaded", () => {
                     <div class="cabecalhoCard">
                         <h3 class="nomeEntrada">${entrada.titulo}</h3>
                     </div>
+                    ${entrada.autor ? `<span class="autorTag">Autor: ${entrada.autor}</span>` : ""}
                     <span class="categoriaTag categoria-${entrada.tipo}">${entrada.tipo}</span>
                     ${referenciaBiblica}
                     <div class="detalhesCard">
@@ -349,6 +464,23 @@ document.addEventListener("DOMContentLoaded", () => {
         visualizarTitulo.textContent = entrada.titulo;
         visualizarTipo.textContent = entrada.tipo;
         visualizarTipo.className = `categoriaTag categoria-${entrada.tipo}`;
+
+        // Exibir autor se for um devocional global
+        const autorInfo = document.getElementById("visualizarAutor");
+        const isEntradaDoUsuario = !entrada.autor || entrada.emailAutor === usuarioLogado.email;
+
+        if (entrada.autor && entrada.tipo === "devocional") {
+            autorInfo.textContent = `Autor: ${entrada.autor}`;
+            autorInfo.style.display = "block";
+            // Desabilitar edição/exclusão para devocionais de outros usuários
+            btnEditarEntrada.style.display = "none";
+            btnExcluirEntrada.style.display = "none";
+        } else {
+            autorInfo.style.display = "none";
+            // Habilitar edição/exclusão para entradas do próprio usuário
+            btnEditarEntrada.style.display = isEntradaDoUsuario ? "inline-block" : "none";
+            btnExcluirEntrada.style.display = isEntradaDoUsuario ? "inline-block" : "none";
+        }
         
         if (entrada.referenciaBiblica) {
             visualizarReferencia.style.display = "flex";
@@ -359,6 +491,9 @@ document.addEventListener("DOMContentLoaded", () => {
         
         visualizarData.textContent = formatarData(entrada.dataCriacao);
         visualizarConteudo.textContent = entrada.conteudo;
+
+        // Registrar interação no histórico
+        registrarInteracao(entrada.id, entrada.titulo, entrada.tipo);
 
         btnEditarEntrada.onclick = () => {
             fecharVisualizarEntrada();
@@ -393,7 +528,13 @@ document.addEventListener("DOMContentLoaded", () => {
 
         if (id) {
             const index = entradas.findIndex(e => e.id == id);
-            entradas[index] = novaEntrada;
+            // Garante que só edita entradas do próprio usuário
+            if (entradas[index].emailAutor && entradas[index].emailAutor !== usuarioLogado.email) {
+                showToast("Você só pode editar suas próprias entradas.", "error");
+                return;
+            }
+            // Mantém as propriedades de autor se existirem
+            entradas[index] = {...entradas[index], ...novaEntrada};
         } else {
             entradas.push(novaEntrada);
         }
@@ -405,6 +546,15 @@ document.addEventListener("DOMContentLoaded", () => {
     };
 
     const excluirEntrada = (id) => {
+        const entradaParaExcluir = entradas.find(e => e.id == id);
+        if (!entradaParaExcluir) return;
+
+        // Garante que só exclui entradas do próprio usuário
+        if (entradaParaExcluir.emailAutor && entradaParaExcluir.emailAutor !== usuarioLogado.email) {
+            showToast("Você só pode excluir suas próprias entradas.", "error");
+            return;
+        }
+
         if (confirm("Tem certeza de que deseja excluir esta entrada?")) {
             entradas = entradas.filter(e => e.id != id);
             salvarEntradas();
@@ -414,8 +564,10 @@ document.addEventListener("DOMContentLoaded", () => {
         }
     };
 
-    // --- Event Listeners ---
-    if (btnNovaEntrada) btnNovaEntrada.addEventListener("click", () => abrirModalEntrada());
+    // Event Listeners
+    if (btnNovaEntrada) {
+        btnNovaEntrada.addEventListener("click", () => abrirModalEntrada());
+    }
     if (btnFecharModalEntrada) btnFecharModalEntrada.addEventListener("click", fecharModalEntrada);
     if (btnCancelarEntrada) btnCancelarEntrada.addEventListener("click", fecharModalEntrada);
     if (formEntrada) formEntrada.addEventListener("submit", salvarEntradaHandler);
@@ -455,8 +607,11 @@ document.addEventListener("DOMContentLoaded", () => {
         if (usuarioLogado) {
             nomeUsuarioPerfil.textContent = usuarioLogado.nome;
             emailUsuarioPerfil.textContent = usuarioLogado.email;
-            carregarEntradas(); // Carrega as entradas específicas do usuário logado
+            
+            // Carrega e renderiza as entradas do perfil (apenas as do usuário logado)
+            carregarEntradas();
             renderizarEntradas("todos", "", "data", gradeEntradasPerfil, entradaVaziaPerfil);
+            exibirHistoricoLeituras(); // Carrega o histórico de leituras
 
             if (filtrosRapidosPerfil) {
                 filtrosRapidosPerfil.forEach(filtro => {
@@ -511,10 +666,14 @@ document.addEventListener("DOMContentLoaded", () => {
 
     // Inicialização da verificação de login
     verificarLogin();
-    // Carregar entradas apenas se estiver na index1.html e logado
-    if (usuarioLogado && window.location.pathname.includes("index1.html")) {
+    // Carregar entradas se estiver logado
+    if (usuarioLogado) {
         carregarEntradas();
-        renderizarEntradas();
+        if (window.location.pathname.includes("index1.html")) {
+            renderizarEntradas();
+        } else if (window.location.pathname.includes("perfil.html")) {
+            // A lógica de inicialização do perfil já está acima, mas garante que o histórico seja exibido
+            exibirHistoricoLeituras();
+        }
     }
 });
-
